@@ -1,30 +1,25 @@
 #!/usr/bin/python3
-"""
-Review Class from Models Module
-"""
-
-from models.base_model import BaseModel, Base
-import sqlalchemy
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+"""Defines the Review class."""
+from models.base_model import Base
+from models.base_model import BaseModel
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
 from sqlalchemy.orm import relationship
-import os
 
 
 class Review(BaseModel, Base):
-    """Review class handles all application reviews"""
+    """Represents a review for a MySQL database.
 
-    if os.getenv('HBNB_TYPE_STORAGE', 'fs') == 'db':
-        __tablename__ = 'reviews'
-        place_id = Column(String(60), ForeignKey('places.id'), nullable=False)
-        user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
-        text = Column(String(1024), nullable=False)
-    else:
-        place_id = ""
-        user_id = ""
-        text = ""
+    Inherits from SQLAlchemy Base and links to the MySQL table reviews.
 
-    def __init__(self, *args, **kwargs):
-        """instantiates a new review"""
-        super().__init__(self, *args, **kwargs)
+    Attributes:
+        __tablename__ (str): The name of the MySQL table to store Reviews.
+        text (sqlalchemy String): The review description.
+        place_id (sqlalchemy String): The review's place id.
+        user_id (sqlalchemy String): The review's user id.
+    """
+    __tablename__ = "reviews"
+    text = Column(String(1024), nullable=False)
+    place_id = Column(String(60), ForeignKey("places.id"), nullable=False)
+    user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
