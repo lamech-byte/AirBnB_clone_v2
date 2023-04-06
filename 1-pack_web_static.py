@@ -1,17 +1,20 @@
-#!/usr/bin/env python3
-# Fabric script to generate a .tgz archive from web_static
+#!/usr/bin/python3
+# A Fabfile for creating a compressed archive of web_static.
 
+import os.path
+from datetime import datetime
 from fabric.api import local
-import datetime
 
-def do_pack():
-    """ Creates a compressed archive of the web_static folder """
-    
-    local("mkdir -p versions")
-    t = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    archive = local("tar -czvf versions/web_static_{}\
-.tgz web_static".format(t))
-    if archive:
-        return ("versions/web_static_{}".format(t))
-    else:
+def pack_web_static():
+    """
+    Creates a compressed archive of web_static directory.
+    """
+    now = datetime.utcnow()
+    timestamp = '{}{:02d}{:02d}{:02d}{:02d}{:02d}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
+    archive_name = "versions/web_static_{}.tgz".format(timestamp)
+    if os.path.isdir("versions") is False:
+        if local("mkdir -p versions").failed is True:
+            return None
+    if local("tar -czvf {} web_static".format(archive_name)).failed is True:
         return None
+    return archive_name
