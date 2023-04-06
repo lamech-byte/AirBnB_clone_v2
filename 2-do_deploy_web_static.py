@@ -9,7 +9,7 @@ import os
 env.hosts = ['54.236.17.124', '100.24.237.123']
 
 # Update with your username
-env.user = "root"  
+env.user = "ubuntu"  
 
 # Update with your private key path
 env.key_filename = '~/.ssh/id_rsa'  
