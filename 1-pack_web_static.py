@@ -5,7 +5,7 @@ import os.path
 from datetime import datetime
 from fabric.api import local
 
-def pack_web_static():
+def do_pack():
     """
     Creates a compressed archive of web_static directory.
     """
