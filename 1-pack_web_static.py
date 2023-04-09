@@ -1,20 +1,17 @@
 #!/usr/bin/python3
 # A Fabfile for creating a compressed archive of web_static.
 
-import os.path
+from fabric.operations import local
 from datetime import datetime
-from fabric.api import local
 
 def do_pack():
     """
     Creates a compressed archive of web_static directory.
     """
-    now = datetime.utcnow()
-    timestamp = '{}{:02d}{:02d}{:02d}{:02d}{:02d}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
-    archive_name = "versions/web_static_{}.tgz".format(timestamp)
-    if os.path.isdir("versions") is False:
-        if local("mkdir -p versions").failed is True:
-            return None
-    if local("tar -czvf {} web_static".format(archive_name)).failed is True:
+    local("mkdir -p versions")
+    result = local("tar -cvzf versions/web_static_{}.tgz web_static"
+                   .format(datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")),
+                   capture=True)
+    if result.failed:
         return None
-    return archive_name
+    return result
