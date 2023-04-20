@@ -114,3 +114,72 @@ def test_init(self):
     self.assertIsInstance(self.amenity, Amenity)
 
 def test_two_models_are_unique(self):
+        """Test that different Amenity instances are unique."""
+        us = Amenity(email="a", password="a")
+        self.assertNotEqual(self.amenity.id, us.id)
+        self.assertLess(self.amenity.created_at, us.created_at)
+        self.assertLess(self.amenity.updated_at, us.updated_at)
+
+    def test_init_args_kwargs(self):
+        """Test initialization with args and kwargs."""
+        dt = datetime.utcnow()
+        st = Amenity("1", id="5", created_at=dt.isoformat())
+        self.assertEqual(st.id, "5")
+        self.assertEqual(st.created_at, dt)
+
+    def test_str(self):
+        """Test __str__ representation."""
+        s = self.amenity.__str__()
+        self.assertIn("[Amenity] ({})".format(self.amenity.id), s)
+        self.assertIn("'id': '{}'".format(self.amenity.id), s)
+        self.assertIn("'created_at': {}".format(
+            repr(self.amenity.created_at)), s)
+        self.assertIn("'updated_at': {}".format(
+            repr(self.amenity.updated_at)), s)
+        self.assertIn("'name': '{}'".format(self.amenity.name), s)
+
+    @unittest.skipIf(type(models.storage) == DBStorage,
+                     "Testing DBStorage")
+    def test_save_filestorage(self):
+        """Test save method with FileStorage."""
+        old = self.amenity.updated_at
+        self.amenity.save()
+        self.assertLess(old, self.amenity.updated_at)
+        with open("file.json", "r") as f:
+            self.assertIn("Amenity." + self.amenity.id, f.read())
+
+    @unittest.skipIf(type(models.storage) == FileStorage,
+                     "Testing FileStorage")
+    def test_save_dbstorage(self):
+        """Test save method with DBStorage."""
+        old = self.amenity.updated_at
+        self.amenity.save()
+        self.assertLess(old, self.amenity.updated_at)
+        db = MySQLdb.connect(user="hbnb_test",
+                             passwd="hbnb_test_pwd",
+                             db="hbnb_test_db")
+        cursor = db.cursor()
+        cursor.execute("SELECT * \
+                          FROM `amenities` \
+                         WHERE BINARY name = '{}'".
+                       format(self.amenity.name))
+        query = cursor.fetchall()
+        self.assertEqual(1, len(query))
+        self.assertEqual(self.amenity.id, query[0][0])
+        cursor.close()
+
+    def test_to_dict(self):
+        """Test to_dict method."""
+        amenity_dict = self.amenity.to_dict()
+        self.assertEqual(dict, type(amenity_dict))
+        self.assertEqual(self.amenity.id, amenity_dict["id"])
+        self.assertEqual("Amenity", amenity_dict["__class__"])
+        self.assertEqual(self.amenity.created_at.isoformat(),
+                         amenity_dict["created_at"])
+        self.assertEqual(self.amenity.updated_at.isoformat(),
+                         amenity_dict["updated_at"])
+        self.assertEqual(self.amenity.name, amenity_dict["name"])
+
+
+if __name__ == "__main__":
+    unittest.main()
