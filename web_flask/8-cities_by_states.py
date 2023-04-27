@@ -2,31 +2,27 @@
 """
 Starts a Flask web application.
 """
-from flask import Flask, render_template
 from models import storage
-from models.state import State
-import os
+from flask import Flask
+from flask import render_template
 
 app = Flask(__name__)
-app.url_map.strict_slashes = False
+
+
+@app.route("/cities_by_states", strict_slashes=False)
+def cities_by_states():
+    """Displays an HTML page with a list of all states and related cities.
+    States/cities are sorted by name.
+    """
+    states = storage.all("State")
+    return render_template("8-cities_by_states.html", states=states)
 
 
 @app.teardown_appcontext
-def teardown_session(exception):
-    """Closes the current SQLAlchemy session."""
+def teardown(exc):
+    """Remove the current SQLAlchemy session."""
     storage.close()
 
 
-@app.route('/cities_by_states')
-def display_states_and_cities():
-    """Displays a list of all State objects and their cities."""
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-        states = storage.all(State).values()
-    else:
-        states = storage.all("State").values()
-    states_sorted = sorted(states, key=lambda state: state.name)
-    return render_template('8-cities_by_states.html', states=states_sorted)
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0")
